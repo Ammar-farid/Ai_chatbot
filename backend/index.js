@@ -31,7 +31,7 @@ async function generateWithFallbackAndRetry(question, retries = 2, delayMs = 100
             } catch (err) {
                 lastError = err;
                 console.warn(`Model ${modelName} failed on attempt ${attempt + 1}: ${err.message}`);
-                
+
                 attempt++;
                 if (attempt < retries) {
                     await new Promise(resolve => setTimeout(resolve, delayMs));
@@ -68,6 +68,11 @@ app.post('/chat', async (req, res) => {
     }
 });
 
-app.listen(process.env.PORT, function () {
-    console.log('Server is running on port ' + process.env.PORT);
-});
+const PORT = process.env.PORT || 5000;
+if (require.main === module) {
+    app.listen(PORT, function () {
+        console.log('Server is running on port ' + PORT);
+    });
+}
+
+module.exports = app;
