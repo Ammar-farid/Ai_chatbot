@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import Loading from './Loading';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -46,13 +47,13 @@ function App() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [backendStatus, setBackendStatus] = useState('checking'); // 'connected', 'error', 'checking'
-  
+
   const messagesEndRef = useRef(null);
 
   // Check backend status on mount
   useEffect(() => {
     // Quick probe to see if backend is up
-    axios.post('http://localhost:3000/chat', { question: 'hello' })
+    axios.post(`${API_URL}/chat`, { question: 'hello' })
       .then(() => setBackendStatus('connected'))
       .catch((err) => {
         console.warn('Backend checking error:', err);
@@ -73,12 +74,12 @@ function App() {
     const userQuestion = input.trim();
     setInput('');
     setIsLoading(true);
-    
+
     // Add user message to list
     setMessages(prev => [...prev, { role: 'user', text: userQuestion }]);
 
     try {
-      const response = await axios.post('http://localhost:3000/chat', {
+      const response = await axios.post(`${API_URL}/chat`, {
         question: userQuestion
       });
 
@@ -124,7 +125,7 @@ function App() {
 
       {/* Main Container */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden max-h-screen min-h-screen">
-        
+
         {/* Sidebar */}
         <aside className="w-full lg:w-80 glass-panel border-b lg:border-b-0 lg:border-r flex flex-col justify-between shrink-0">
           <div>
@@ -139,13 +140,12 @@ function App() {
                   <p className="text-xs text-neutral-400">Gemini 2.5 Flash</p>
                 </div>
               </div>
-              
+
               {/* Status Indicator */}
               <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/5">
-                <span className={`w-2 h-2 rounded-full ${
-                  backendStatus === 'connected' ? 'bg-emerald-400 animate-pulse' :
-                  backendStatus === 'error' ? 'bg-rose-400' : 'bg-amber-400 animate-pulse'
-                }`}></span>
+                <span className={`w-2 h-2 rounded-full ${backendStatus === 'connected' ? 'bg-emerald-400 animate-pulse' :
+                    backendStatus === 'error' ? 'bg-rose-400' : 'bg-amber-400 animate-pulse'
+                  }`}></span>
                 <span className="text-[10px] uppercase font-medium text-neutral-300">
                   {backendStatus === 'connected' ? 'Online' : backendStatus === 'error' ? 'Offline' : 'Checking'}
                 </span>
@@ -154,7 +154,7 @@ function App() {
 
             {/* Sidebar Content */}
             <div className="p-6 space-y-6">
-              <button 
+              <button
                 onClick={handleClearChat}
                 className="w-full py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-sm font-medium text-white transition-all duration-200 flex items-center justify-center space-x-2"
               >
@@ -192,14 +192,14 @@ function App() {
 
         {/* Chat Window */}
         <main className="flex-1 flex flex-col justify-between overflow-hidden relative">
-          
+
           {/* Top Bar for Mobile */}
           <div className="lg:hidden p-4 border-b border-white/5 flex items-center justify-between bg-black/20 backdrop-blur-md">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center font-bold text-white">Æ</div>
               <span className="font-semibold text-white">AetherChat</span>
             </div>
-            <button 
+            <button
               onClick={handleClearChat}
               className="p-2 rounded-lg bg-white/5 border border-white/5 text-xs text-white"
             >
@@ -211,11 +211,10 @@ function App() {
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div className="max-w-4xl mx-auto space-y-6">
               {messages.map((msg, index) => (
-                <div 
+                <div
                   key={index}
-                  className={`flex items-start space-x-4 animate-fade-in ${
-                    msg.role === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
+                  className={`flex items-start space-x-4 animate-fade-in ${msg.role === 'user' ? 'justify-end' : 'justify-start'
+                    }`}
                 >
                   {/* AI Avatar */}
                   {msg.role === 'ai' && (
@@ -225,13 +224,12 @@ function App() {
                   )}
 
                   {/* Message Bubble */}
-                  <div className={`relative group max-w-[85%] rounded-2xl p-4 shadow-sm border ${
-                    msg.role === 'user' 
-                      ? 'bg-indigo-600/90 text-white border-indigo-500/50 rounded-tr-none glow-indigo' 
+                  <div className={`relative group max-w-[85%] rounded-2xl p-4 shadow-sm border ${msg.role === 'user'
+                      ? 'bg-indigo-600/90 text-white border-indigo-500/50 rounded-tr-none glow-indigo'
                       : msg.isError
                         ? 'bg-rose-950/45 text-rose-200 border-rose-900/50 rounded-tl-none'
                         : 'glass-panel-light text-neutral-100 border-white/5 rounded-tl-none'
-                  }`}>
+                    }`}>
                     {/* Copy Button for AI Messages */}
                     {msg.role === 'ai' && !msg.isError && (
                       <CopyButton text={msg.text} />
@@ -266,7 +264,7 @@ function App() {
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
           </div>
@@ -300,7 +298,7 @@ function App() {
                 disabled={isLoading}
                 className="w-full bg-white/5 hover:bg-white/[0.08] focus:bg-white/[0.08] text-white placeholder-neutral-400 py-4 pl-5 pr-14 rounded-2xl border border-white/10 focus:border-indigo-500/80 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all duration-200 text-sm shadow-inner disabled:opacity-50"
               />
-              
+
               <button
                 type="submit"
                 disabled={isLoading || !input.trim()}

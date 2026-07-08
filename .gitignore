@@ -10,9 +10,11 @@ dist-ssr/
 
 # Environment files
 .env
+.env.*
 *.env
-backend/.env
-frontend/.env
+*.env.*
+backend/.env*
+frontend/.env*
 .env.local
 .env.*.local
 
